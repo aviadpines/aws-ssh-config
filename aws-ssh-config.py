@@ -55,6 +55,7 @@ def main():
     parser.add_argument('--user', help='override the ssh username for all hosts')
     parser.add_argument('--default-user', help='default ssh username to use if we cannot detect from AMI name')
     parser.add_argument('--prefix', default='', help='specify a prefix to prepend to all host names')
+    parser.add_argument('--namefilter', default='', help='specify a regex filter to filter the names of the instances')
 
     args = parser.parse_args()
 
@@ -121,6 +122,11 @@ def main():
                     ip = instance.ip_address
 
             id = generate_id(instance, args.tags, args.region)
+
+            if args.namefilter is not None:
+                rf = re.compile(args.namefilter)
+                if rf.match(id) is None:
+                    continue
 
             if counts_total[id] != 1:
                 counts_incremental[id] += 1
