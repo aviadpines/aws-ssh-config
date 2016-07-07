@@ -58,10 +58,13 @@ def main():
     parser.add_argument('--name-filter', help='Specify a regex filter to filter the names of the instances')
     parser.add_argument('--key-folder', default='~/.ssh/', help='Location of the identity files folder')
     parser.add_argument('--proxy', help='Regex of the proxy server, all other hosts (not excluded) will be using it to connect')
+    parser.add_argument('--dynamic-forward', type=int, help='Use dynamic forwarding when opening the proxy defined with --proxy')
+    parser.add_argument('--no-strict-check', action='store_true', help='Disable strict host key checking')
+    parser.add_argument('--no-host-key-check', action='store_true', help='Disable strict host key checking')
+    parser.add_argument('--keep-alive', type=int,  help='Disable strict host key checking')
 
     args = parser.parse_args()
 
-    instances = {}
     counts_total = {}
     counts_incremental = {}
     amis = {}
@@ -129,6 +132,17 @@ def main():
         if proxy_server is None:
             print >> sys.stderr, 'No proxy server found!'
 
+    # global settings
+    if args.no_strict_check or args.no_host_key_check or args.keep_alive is not None:
+        print 'Host ' + args.prefix + '*'
+        if args.no_strict_check:
+            print '  StrictHostKeyChecking no'
+        if args.no_host_key_check:
+            print '  UserKnownHostsFile /dev/null'
+        if args.keep_alive is not None:
+            print '  ServerAliveInterval ' + str(args.keep_alive)
+        print
+
     for id in sorted(ids):
         instance = ids[id]
         if args.private:
@@ -152,8 +166,13 @@ def main():
         print 'Host ' + args.prefix + id
         print '  HostName ' + ip
 
-        if proxy_server is not None and use_proxy and proxy_server != id:
-            print '  ProxyCommand ssh ' + proxy_server + ' /bin/nc %h %p 2> /dev/null'
+        if proxy_server is not None:
+            if proxy_server == args.prefix + id:
+                if args.dynamic_forward is not None:
+                    # this is the proxy server, use dynamic forward
+                    print '  DynamicForward *:' + str(args.dynamic_forward)
+            elif use_proxy:
+                print '  ProxyCommand ssh ' + proxy_server + ' /bin/nc %h %p 2> /dev/null'
 
         try:
             if amis[instance.image_id] is not None:
@@ -162,6 +181,7 @@ def main():
             pass
 
         print '  IdentityFile ' + keys + instance.key_name + '.pem'
+
         print
 
 
