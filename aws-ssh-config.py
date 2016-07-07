@@ -56,6 +56,7 @@ def main():
     parser.add_argument('--default-user', help='default ssh username to use if we cannot detect from AMI name')
     parser.add_argument('--prefix', default='', help='specify a prefix to prepend to all host names')
     parser.add_argument('--namefilter', default='', help='specify a regex filter to filter the names of the instances')
+    parser.add_argument('--keyfolder', default='~/.ssh/', help='location of the identity files folder')
 
     args = parser.parse_args()
 
@@ -63,6 +64,8 @@ def main():
     counts_total = {}
     counts_incremental = {}
     amis = {}
+
+    key_folder = args.keyfolder if args.keyfolder.endswith("/") else args.keyfolder + '/'
 
     for region in boto.ec2.regions():
         if region.name in BLACKLISTED_REGIONS:
@@ -146,7 +149,7 @@ def main():
             except:
                 pass
 
-            print '    IdentityFile ~/.ssh/' + instance.key_name + '.pem'
+            print '    IdentityFile ' + key_folder + instance.key_name + '.pem'
             print '    StrictHostKeyChecking no' # just for me, removing this is usually a good choice
             print
 
