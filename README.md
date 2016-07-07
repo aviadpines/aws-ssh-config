@@ -157,11 +157,15 @@ If you want to configure a proxy server, use `--proxy` and specify the its regex
 $  python aws-ssh-config.py --proxy ".*-bastion"
 ```
 
+The proxy will be used on all machines that are using private ip (except the proxy server itself).
+
 Using (almost) all the flags together:
 
 ```
 $  python aws-ssh-config.py --profile my_profile --tags Name --name-filter ".*my_host.*" --key-folder "~/my_keys/" --prefix "myprefix-" --proxy ".*bastion.*"
 ```
+
+Public ips are used by default, and private are only used if a public ip cannot be found. If you want to use private ips on all machines, use `--private`.
 
 
 Tab Completion
