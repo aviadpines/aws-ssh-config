@@ -55,7 +55,7 @@ def main():
     parser.add_argument('--user', help='Override the ssh username for all hosts')
     parser.add_argument('--default-user', help='Default ssh username to use if we cannot detect from AMI name')
     parser.add_argument('--prefix', default='', help='Specify a prefix to prepend to all host names')
-    parser.add_argument('--name-filter', help='Specify a regex filter to filter the names of the instances')
+    parser.add_argument('--name-filter', default='.*', help='Specify a regex filter to filter the names of the instances')
     parser.add_argument('--key-folder', default='~/.ssh/', help='Location of the identity files folder')
     parser.add_argument('--proxy', help='Regex of the proxy server, all other hosts (not excluded) will be using it to connect')
     parser.add_argument('--dynamic-forward', type=int, help='Use dynamic forwarding when opening the proxy defined with --proxy')
